@@ -14,18 +14,22 @@
 
 **Embeddings Layer:**
 
-입력 형태 :
+입력 형태 : 
+
 word_embeddings:  Vocabulary  len: 30522, Hidden size: 768 
 
 position_embeddings: 시퀀스 max len: 512, Hidden size: 768 
 
 Dropout: 0.1
 
-출력 형태 :
+출력 형태 : 
+
 (batch_size, seq_len, hidden_size) :  (64, 512,768)
 
-**Classifier**:
-입력: 768 (hidden_size)
+**Classifier**: 
+
+입력: 768 (hidden_size) 
+
 출력: 3 (3개의 분류 클래스)
 
 > DistilBert:

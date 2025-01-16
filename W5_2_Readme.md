@@ -1,77 +1,60 @@
-## Q1) 어떤 task를 선택하셨나요?
 
-> NER, MNLI, 기계 번역 셋 중 하나를 선택
+주제 : 뉴스/포럼 등 방문 및 요약하여 자동 코인 매매
+ 
+1. 프로젝트 입/출력 정하기
+    Prompt: "당신은 코인분석에 능한 금융분석가입니다,  현재 국제 경제 뉴스를 분석하여 최근 코인자본의 이상 변동을 알아차리고 json 식으로 요약해주세요. 그리고 가장 핫한 코인도 알려주세요"
 
-###### **Re**: **MNLI task 를 선택했습니다.**
+    입력: URL: 정기적으로 LLM 으로 주소제공. 
 
-## Q2) 모델은 어떻게 설계하셨나요? 설계한 모델의 입력과 출력 형태가 어떻게 되나요?
-
-> 모델의 입력과 출력 형태 또는 shape을 정확하게 기술
-
-###### Re: 구현한 모델은 DistilBert 와 Transformer 를 택하였습니다.
-
-> **DistilBert:**
-
-**Embeddings Layer:**
-
-입력 형태 :
-
-* word_embeddings:  Vocabulary  len: 30522, Hidden size: 768
-* position_embeddings: 시퀀스 max len: 512, Hidden size: 768
-*  Dropout: 0.1
-
-출력 형태 :
-
-* (batch_size, seq_len, hidden_size) :  (64, 512,768)
-
-**Classifier**:
-
-* 입력: 768 (hidden_size)
-* 출력: 3 (3개의 분류 클래스)
-
-> DistilBert:
-> ![image](https://github.com/user-attachments/assets/04f48f12-e342-4bc1-a5f9-95e33244d954)
-
-> **Transformer:**
-
-입력 형태 :
-word_embeddings:  Vocabulary  len: 30522, Hidden size: 768
-Position embeddings: (512,768)
-
-**Self-Attention:**
-
-* Query: `(batch_size, in_features, out_features)` -> (64, 768, 768)
-* Key: `(batch_size, in_features, out_features)`-> (64, 768, 768)
-* Value: `(batch_size, in_features, out_features)`-> (64, 768, 768)
-
-**FFN:**
-
-* Layer1: Hidden size 확장 (768 → 3072).
-* Layer2: Hidden size 축소 (3072 → 768).
-
-**출력 형태** : `(in_features, num_classes)`: `(768, 3)`
-
-![image](https://github.com/user-attachments/assets/92cb4c82-7cb3-4ad3-b8a2-63b9b9adff17)
+    출력: 
+    {
+        "Name":"BitCoin",
+        "Side":"Buy",
+        "hot": "bullish"
+    },
+    {
+        "Name":"DogeCoin",
+        "Side":"Buy",
+        "hot": "scam"
+    }
+    ....
 
 
-## Q3) 어떤 pre-trained 모델을 활용하셨나요?
+2. 방법론 정하기
 
-> PyTorch에서 위에서 정한 task에 맞는 pre-trained 모델을 선정
-> **Re**: DistilBert 모델을 활용했습니다.
+    1) 데이터 소스
+        감성 분석을 위해 여러 플랫폼에서 암호화폐 관련 데이터를 수집해야 합니다. 
+        주요 데이터 소스는     다음과 같습니다:
 
-## Q4) 실제로 pre-trained 모델을 fine-tuning했을 때 loss curve은 어떻게 그려지나요? 그리고 pre-train 하지 않은 Transformer를 학습했을 때와 어떤 차이가 있나요?
+        소셜 미디어:
+        Twitter (주요 암호화폐 논의 활발)
+        Reddit (토론 그룹, 포럼)
+        Telegram 및 Discord (프로젝트 공식 그룹)
 
-> 비교 metric은 loss curve, accuracy, 또는 test data에 대한 generalization 성능 등을 활용.
-> ![image](https://github.com/user-attachments/assets/e96b2c90-bfbf-4b5e-99dc-8362d014a330)
-> ![image](https://github.com/user-attachments/assets/b887131f-ece2-402a-bab8-e2329596f6ee)
-> ![image](https://github.com/user-attachments/assets/0338e3c1-98e0-422b-adf6-16c2d0c85526)
+        뉴스 및 블로그:
+        특정 암호화폐에 대한 뉴스 기사나 심층 분석.
 
-## Conclusion
+        포럼:
+        Bitcointalk 및 기타 암호화폐 관련 포럼.
 
-* distilbert pretaining 모델을 통한 학습은 속도가 빠르고 정상적인 결과가 보였습니다.
-* distilbert 결과에서는 정확도가 천천히 올라가는 모습이지만 20번의 학습차례에서 55% 가까이의 정확도가 나옵니다.
-* transformer 를 통한 학습은 속도가 느리고, 정확도가 학습기간 정확도 계선되지 못했습니다.
-* distilbert 모델의 성능에서 더욱 빨르고 효과가 더 좋았음을 보여줍니다.
+        거래소 리뷰:
+        거래소나 데이터 플랫폼(CoinGecko, CoinMarketCap)에서 사용자 리뷰 수집.
 
 
 
+
+    2) 기술적 접근법
+        
+        step 1. api 나 webpage spyder 웹 데이터를 가져올수 있도록 실현
+
+        step 2. 각기 다른 웹 페이지 방문한 데이터로 일정의 같은 포멧으로 요약
+                LLM 사용하여 문서 요약식으로 진행합니다.
+
+        step 3. 요약건을 취합하여  키워드 추출: 
+                특정 키워드(예: "bullish", "FOMO", "scam")를 인식하여 시장 감정을 평가.
+           
+        step 4. 자동매매 시스템으로 json 데이터 전송 및 자동매매 실행
+
+
+3. 실제로 prompt를 줬을 때 LLM의 응답
+        ( 아직은 미 테스트 상태입니다. 데체의 개념으로 설계상태이고 간단한 기능을 차레로 진행/개선 할 예정입니다. )

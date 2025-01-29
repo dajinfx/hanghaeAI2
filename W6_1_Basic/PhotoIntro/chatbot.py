@@ -50,10 +50,10 @@ class ChatBot:
         image_contents = [self.encode_image(img) for img in st.session_state.uploaded_images]
         
         prompt = f"""I have {len(st.session_state.uploaded_images)} images to compare. Please analyze these images and tell me:
-        1. What are the main differences between these images?
-        2. What are the similarities?
-        3. Which image has better quality or composition?
-        Please provide a detailed analysis."""
+        1. 이 이미지들 사이의 주요 차이점은 무엇입니까?
+        2. 유사점은 무엇입니까?
+        3. 어느 이미지가 품질이나 구성이 더 좋습니까?
+        자세한 분석을 제공해 주십시오."""
         
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -96,7 +96,7 @@ class ChatBot:
                     messages = [
                         {
                             "role": "system",
-                            "content": "You are a helpful AI assistant specialized in image analysis. Please provide detailed and accurate responses."
+                            "content": "당신은 이미지 분석을 하는 AI 전문가입니다. 자세하고 정확한 답변을 제공해 주세요."
                         },
                         {
                             "role": "user",
@@ -107,7 +107,7 @@ class ChatBot:
                         }
                     ]
                     
-                    # 调用 GPT-4 Vision API
+                    # GPT-4 Vision API
                     response = self.model.invoke(messages)
                     st.markdown(response.content)
                     st.session_state.messages.append({

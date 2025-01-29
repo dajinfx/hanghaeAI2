@@ -148,7 +148,7 @@ class ChatBot:
         # 대화 history display
         self.display_chat_history()
         
-        # 쳇봇 대화입력력
+        # 쳇봇 대화입력
         if prompt := st.chat_input("Ask about the images or type any question"):
             self.process_user_input(prompt)
             self.generate_response()

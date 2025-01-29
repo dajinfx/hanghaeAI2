@@ -17,7 +17,7 @@ def setup_sidebar():
     with st.sidebar:
         st.title("Image Upload")
         
-        # 이미지 버튼튼
+        # 이미지 버튼
         uploaded_file = st.file_uploader("Choose an image", type=['png', 'jpg', 'jpeg'])
         
         if uploaded_file is not None and len(st.session_state.uploaded_images) < 5:
@@ -30,7 +30,7 @@ def setup_sidebar():
             except Exception as e:
                 st.error(f"Error loading image: {str(e)}")
         
-        # 이미지 Side bar에다 리스트 
+        # 이미지 List 
         if st.session_state.image_names:
             st.write("Uploaded Images:")
             for i, name in enumerate(st.session_state.image_names):
@@ -43,7 +43,7 @@ def setup_sidebar():
                         st.session_state.image_names.pop(i)
                         st.rerun()
         
-        # 모든 이미지 삭제하기기
+        # 모든 이미지 삭제
         if st.session_state.uploaded_images:
             if st.button("Clear All Images"):
                 st.session_state.uploaded_images = []
@@ -60,7 +60,7 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     # Side bar
     setup_sidebar()
     
-    # 챗보가져오기 chatbot
+    # 챗봇 가져오기  chatbot
     chatbot = ChatBot(app_title, model_name)
     chatbot.run()
 

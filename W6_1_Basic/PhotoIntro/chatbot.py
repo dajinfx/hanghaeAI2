@@ -3,13 +3,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from model import MyModel
 import os
-from dotenv import load_dotenv
 import requests
 import io
 import base64
 import traceback
-
-load_dotenv()
 
 class ChatBot:
     def __init__(self, app_title, model_name='gpt-4o-mini'):

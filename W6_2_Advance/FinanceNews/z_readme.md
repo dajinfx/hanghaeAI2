@@ -5,5 +5,4 @@ python -m streamlit run D:\Git\hanghaeAI2\W6_2_Advance\FinanceNews\app.py
 
 cd  D:\Program\Anaconda\Scripts
 
-123
 ![alt text](z_image.png)

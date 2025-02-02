@@ -10,7 +10,6 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import pandas as pd
 from io import StringIO
-import docx
 import PyPDF2
 import io
 from langchain.document_loaders import PyPDFLoader
@@ -21,7 +20,6 @@ from rag import RAGProcessor
 
 import bs4
 from langchain import hub
-from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import WebBaseLoader
@@ -30,6 +28,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import asyncio
 from streamlit.runtime.scriptrunner import add_script_run_ctx
+import platform
 
 
 def sidebar():
@@ -40,18 +39,27 @@ def sidebar():
 
     with st.sidebar.expander("🔎 Model", expanded=True):
         model_cat = st.selectbox(
-            'Model', ('OpenAI-4o', 'Deepseek', 'Grok'), index=0)
+            'Model', ('gpt-4o-mini', 'Deepseek', 'Grok'), index=0)
+    
+    # API Key 설정
+    with st.sidebar.expander("🔑 API Key", expanded=False):
+        key_file = st.file_uploader("Upload key file", type=['txt'])
+        #key_content = st.session_state['api_key']
+        if key_file is not None:
+            key_content = key_file.getvalue().decode('utf-8').strip()
+            env_para = model_cat
+            os.environ[env_para] = key_content
+            print ("key_content: ",key_content)
+            st.success("Key loaded!")
+            
+        if 'api_key' in st.session_state:
+            st.write("Key status: ✅")
+            if st.button("Clear key"):
+                del st.session_state['api_key']
+                st.rerun()
 
-    #with st.sidebar.expander("🔎 TOPIC", expanded=True):
-    #    topic = st.text_input(
-    #        'Keywords or phrases to search in the News', 'Bitcoin')
-    #    topic = topic.strip()
-    #    if not topic:
-    #        st.warning('Please enter a valid topic.')
-
-    #with st.sidebar.expander("🔝 TOP-STORIES", expanded=True):
-    #    category = st.selectbox(
-    #        'Category', ('Crypto', 'Forex', 'Stock', 'Fund'), index=0)
+    print ("model_cat: ",model_cat)
+    
 
     return model_cat, None, None
 
@@ -75,7 +83,9 @@ def read_txt(file):
 def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     st.set_page_config(layout="wide")
     model_handler = MyModel(model_name)
-    api_key = model_handler.get_api()
+    
+    # session_state에서 api_key 가져오기
+    api_key = st.session_state.get('api_key', model_handler.get_api())
     
     # RAG 프로세서 생성
     rag_processor = RAGProcessor(model_name, api_key)
@@ -139,8 +149,8 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
                                 st.write("### 문서 요약")
                                 st.write(result)
                     
-            except Exception as e:
-                st.error(f"Error reading file: {str(e)}")
+            except:
+                st.error(f"Error reading file")
 
 if __name__ == "__main__":
     app_title = "My Bot"

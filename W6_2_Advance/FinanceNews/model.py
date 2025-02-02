@@ -1,17 +1,19 @@
 import streamlit as st
 import os
+from dotenv import load_dotenv
+import platform
 
 class MyModel:
     def __init__(self, model_name):
         self.model_name = model_name
         self.model_configs = {
             'gpt-4o-mini': {
-                'env_key': 'openAI_gpt-4o-mini',
+                'env_key': 'gpt-4o-mini',
                 'model_type': 'openai',
                 'model_name': 'gpt-4o-mini'
             },
             'deepseek-chat': {
-                'env_key': 'DEEPSEEK_API_KEY',
+                'env_key': 'deepseek-chat',
                 'model_type': 'deepseek',
                 'model_name': 'deepseek-chat'
             },
@@ -28,7 +30,6 @@ class MyModel:
         config = self.model_configs[self.model_name]
         #print("config: ",config)   
         api_key = os.environ.get(config['env_key'])
-            
         #print(f"Getting API key for {config['env_key']}: {api_key}")
         return api_key
     

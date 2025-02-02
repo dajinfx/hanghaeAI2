@@ -22,18 +22,22 @@ class ChatBot:
         model_config = self.model_handler.get_model_config()
         print("모델 설정:", model_config)
         #print("API 키:", self.api_key)
-        
-        os.environ['OPENAI_API_KEY'] = self.api_key
-        
-        if model_config['model_type'] == 'openai':
-            self.model = ChatOpenAI(model=model_config['model_name'], api_key=self.api_key)
-        elif model_config['model_type'] == 'anthropic':
-            self.model = "" #ChatAnthropic(...)
-        elif model_config['model_type'] == 'deepseek':
-            self.model = DeepSeekChat(
-                api_key=self.api_key,
-                model=model_config['model_name']
+        try:
+            if model_config['model_type'] == 'openai':
+                self.model = ChatOpenAI(model=model_config['model_name'], api_key=self.api_key)
+            elif model_config['model_type'] == 'anthropic':
+                self.model = "" #ChatAnthropic(...)
+            elif model_config['model_type'] == 'deepseek':
+                self.model = DeepSeekChat(
+                    api_key=self.api_key,
+                    model=model_config['model_name']
             )
+        except:
+            st.session_state.messages = []
+            st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "API key error"
+                })
 
     def initialize_session(self):
         if "messages" not in st.session_state:
@@ -171,5 +175,5 @@ class DeepSeekChat:
                 error_msg = response.json().get('error', {}).get('message', 'Unknown error')
                 raise Exception(f"API call failed: {error_msg}")
                 
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Network error: {str(e)}")
+        except:
+            raise Exception(f"Network error: {error_msg}")

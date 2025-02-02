@@ -1,6 +1,5 @@
 import bs4
 from langchain import hub
-from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import WebBaseLoader

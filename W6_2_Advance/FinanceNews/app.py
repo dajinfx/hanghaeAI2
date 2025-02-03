@@ -29,7 +29,8 @@ from langchain.chains import LLMChain
 import asyncio
 from streamlit.runtime.scriptrunner import add_script_run_ctx
 import platform
-
+from dotenv import load_dotenv, set_key
+import os
 
 def sidebar():
     """사이드바를 구성하고 사용자 설정을 반환합니다."""
@@ -43,8 +44,9 @@ def sidebar():
     
     # API Key 설정
     with st.sidebar.expander("🔑 API Key", expanded=False):
-        key_file = st.file_uploader("Upload key file", type=['txt'])
+        #key_file = st.file_uploader("Upload key file", type=['txt'])
         #key_content = st.session_state['api_key']
+        key_file = st.file_uploader("Upload key file", type=['txt'], accept_multiple_files=False)
         if key_file is not None:
             key_content = key_file.getvalue().decode('utf-8').strip()
             env_para = model_cat
@@ -55,7 +57,7 @@ def sidebar():
 
             env_path = os.path.join(os.getcwd(), ".env")
             save_env_variable(env_path, model_cat, key_content)
-            print(f"{env_path} env. 입력성공！")
+            #print(f"{env_path} env. 입력성공！")
             
         if 'api_key' in st.session_state:
             st.write("Key status: ✅")
@@ -70,8 +72,25 @@ def sidebar():
 
 # 手动写入 .env 文件
 def save_env_variable(env_path,key, value):
-    with open(env_path, "a") as f:
-        f.write(f"{key}={value}\n")
+    env_lines = []
+    key_exists = False
+
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith(f"{key}="):
+                    env_lines.append(f"{key}={value}\n")
+                    key_exists = True
+                else:
+                    env_lines.append(line)
+
+    if not key_exists:
+        env_lines.append(f"{key}={value}\n")
+
+    with open(env_path, "w", encoding="utf-8") as f:
+        f.writelines(env_lines)
+
+    print(f"{key}={value} 已成功写入 {env_path}")
 
 def read_pdf(file):
     pdf_reader = PyPDF2.PdfReader(file)

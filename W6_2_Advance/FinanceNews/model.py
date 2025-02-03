@@ -28,9 +28,21 @@ class MyModel:
         if self.model_name not in self.model_configs:
             raise ValueError(f"Unsupported model: {self.model_name}")
         config = self.model_configs[self.model_name]
-        #print("config: ",config)   
-        api_key = os.environ.get(config['env_key'])
+        
+        print("mymodel-config: ",config)   
+        #api_key = os.environ.get(config['env_key'])
+        #print("mymodel-config['env_key']: ",config['env_key'])  
+
+        #print("mymodel-api_key: ",api_key)   
         #print(f"Getting API key for {config['env_key']}: {api_key}")
+
+        env_path = os.path.join(os.getcwd(), ".env")
+        load_dotenv(env_path)  # 加载 .env 文件
+        api_key = os.getenv(config['env_key'])
+        print(f"--------  API_KEY: {api_key}")
+
+
+
         return api_key
     
     def get_model_config(self):

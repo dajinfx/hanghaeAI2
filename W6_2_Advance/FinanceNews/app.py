@@ -48,9 +48,14 @@ def sidebar():
         if key_file is not None:
             key_content = key_file.getvalue().decode('utf-8').strip()
             env_para = model_cat
-            os.environ[env_para] = key_content
-            print ("key_content: ",key_content)
-            st.success("Key loaded!")
+
+            #os.environ[env_para] = key_content
+            #print ("key_content: ",key_content)
+            #st.success("Key loaded!")
+
+            env_path = os.path.join(os.getcwd(), ".env")
+            save_env_variable(env_path, model_cat, key_content)
+            print(f"{env_path} env. 입력성공！")
             
         if 'api_key' in st.session_state:
             st.write("Key status: ✅")
@@ -63,6 +68,11 @@ def sidebar():
 
     return model_cat, None, None
 
+# 手动写入 .env 文件
+def save_env_variable(env_path,key, value):
+    with open(env_path, "a") as f:
+        f.write(f"{key}={value}\n")
+
 def read_pdf(file):
     pdf_reader = PyPDF2.PdfReader(file)
     text = ""
@@ -72,6 +82,7 @@ def read_pdf(file):
 
 def read_docx(file):
     doc = docx.Document(file)
+    print("Doc fuck!")
     text = ""
     for para in doc.paragraphs:
         text += para.text + "\n"

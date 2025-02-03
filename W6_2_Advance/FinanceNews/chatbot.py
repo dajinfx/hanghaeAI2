@@ -21,6 +21,7 @@ class ChatBot:
         
         model_config = self.model_handler.get_model_config()
         print("모델 설정:", model_config)
+        print("api_key",self.api_key)
         #print("API 키:", self.api_key)
         try:
             if model_config['model_type'] == 'openai':

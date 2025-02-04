@@ -46,3 +46,5 @@ langchain
 langchain-core
 asyncio
 python-docx
+langchain_openai
+chatbot

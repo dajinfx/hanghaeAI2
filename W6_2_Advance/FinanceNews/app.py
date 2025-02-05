@@ -31,6 +31,7 @@ from streamlit.runtime.scriptrunner import add_script_run_ctx
 import platform
 from dotenv import load_dotenv, set_key
 import os
+import docx
 
 def sidebar():
     """사이드바를 구성하고 사용자 설정을 반환합니다."""

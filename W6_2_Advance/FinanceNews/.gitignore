@@ -11,3 +11,5 @@
 
 
 source*.csv
+
+.env

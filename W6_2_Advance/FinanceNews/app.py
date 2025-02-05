@@ -31,7 +31,7 @@ from streamlit.runtime.scriptrunner import add_script_run_ctx
 import platform
 from dotenv import load_dotenv, set_key
 import os
-import docx
+import docx2txt
 
 def sidebar():
     """사이드바를 구성하고 사용자 설정을 반환합니다."""
@@ -101,15 +101,10 @@ def read_pdf(file):
     return text
 
 def read_docx(file):
-    doc = docx.Document(file)
-    print("Doc fuck!")
-    text = ""
-    for para in doc.paragraphs:
-        text += para.text + "\n"
-    return text
+    return docx2txt.process(file)
 
 def read_txt(file):
-    return str(file.read(), "utf-8")
+    return file.getvalue().decode('utf-8')
 
 def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     st.set_page_config(layout="wide")

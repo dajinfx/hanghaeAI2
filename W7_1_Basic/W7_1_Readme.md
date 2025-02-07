@@ -1,7 +1,7 @@
 ## Week7 Baisc 
 
 ### 데이터
-- nyu-mll/glue (week4 기본과제)
+- nyu-mll/glue (week7 기본과제)
 
 ### 모델 학습
 - microsoft/deberta-base-mnli

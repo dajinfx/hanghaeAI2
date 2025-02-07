@@ -1,60 +1,14 @@
+## Week7 Baisc 
 
-주제 : 뉴스/포럼 등 방문 및 요약하여 자동 코인 매매
- 
-1. 프로젝트 입/출력 정하기
-    Prompt: "당신은 코인분석에 능한 금융분석가입니다,  현재 국제 경제 뉴스를 분석하여 최근 코인자본의 이상 변동을 알아차리고 json 식으로 요약해주세요. 그리고 가장 핫한 코인도 알려주세요"
+### 데이터
+- nyu-mll/glue (week4 기본과제)
 
-    입력: URL: 정기적으로 LLM 으로 주소제공. 
+### 모델 학습
+- microsoft/deberta-base-mnli
+- train의 5%만 사용 (로컬 학습이라 resource 및 시간 문제)
 
-    출력: 
-    {
-        "Name":"BitCoin",
-        "Side":"Buy",
-        "hot": "bullish"
-    },
-    {
-        "Name":"DogeCoin",
-        "Side":"Buy",
-        "hot": "scam"
-    }
-    ....
+#### train loss
+<img src = "image_temp/train_loss.png" width="400px">
 
-
-2. 방법론 정하기
-
-    1) 데이터 소스
-        감성 분석을 위해 여러 플랫폼에서 암호화폐 관련 데이터를 수집해야 합니다. 
-        주요 데이터 소스는     다음과 같습니다:
-
-        소셜 미디어:
-        Twitter (주요 암호화폐 논의 활발)
-        Reddit (토론 그룹, 포럼)
-        Telegram 및 Discord (프로젝트 공식 그룹)
-
-        뉴스 및 블로그:
-        특정 암호화폐에 대한 뉴스 기사나 심층 분석.
-
-        포럼:
-        Bitcointalk 및 기타 암호화폐 관련 포럼.
-
-        거래소 리뷰:
-        거래소나 데이터 플랫폼(CoinGecko, CoinMarketCap)에서 사용자 리뷰 수집.
-
-
-
-
-    2) 기술적 접근법
-        
-        step 1. api 나 webpage spyder 웹 데이터를 가져올수 있도록 실현
-
-        step 2. 각기 다른 웹 페이지 방문한 데이터로 일정의 같은 포멧으로 요약
-                LLM 사용하여 문서 요약식으로 진행합니다.
-
-        step 3. 요약건을 취합하여  키워드 추출: 
-                특정 키워드(예: "bullish", "FOMO", "scam")를 인식하여 시장 감정을 평가.
-           
-        step 4. 자동매매 시스템으로 json 데이터 전송 및 자동매매 실행
-
-
-3. 실제로 prompt를 줬을 때 LLM의 응답
-        ( 아직은 미 테스트 상태입니다. 데체의 개념으로 설계상태이고 간단한 기능을 차레로 진행/개선 할 예정입니다. )
+#### test loss & accuracy
+<img src = "image_temp/eval_loss.png" width="400px"> <img src = "image_temp/eval_accuracy.png" width="400px">

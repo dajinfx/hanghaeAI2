@@ -48,3 +48,4 @@ asyncio
 python-docx
 langchain_openai
 chatbot
+docx2txt

@@ -32,16 +32,35 @@ import platform
 from dotenv import load_dotenv, set_key
 import os
 import docx2txt
+import requests
+from bs4 import BeautifulSoup
 
 def sidebar():
     """사이드바를 구성하고 사용자 설정을 반환합니다."""
-    with st.sidebar.expander("🔎 Model", expanded=True):
-        st.image("https://www.onepointltd.com/wp-content/uploads/2024/02/shutterstock_1166533285-Converted-02.png")
-        st.title("Document Analysis")
+    
+    #with st.sidebar.expander("🔎 Model", expanded=True):
+    #    st.image("https://www.onepointltd.com/wp-content/uploads/2024/02/shutterstock_1166533285-Converted-02.png")
+    #    st.title("Document Analysis")
 
     with st.sidebar.expander("🔎 Model", expanded=True):
-        model_cat = st.selectbox(
-            'Model', ('gpt-4o-mini', 'Deepseek', 'Grok'), index=0)
+        model_cat = st.selectbox('', ('gpt-4o-mini', 'Deepseek', 'Grok'), index=0)
+        st.markdown(
+        """
+            <style>
+            .stSelectbox {
+                margin-top: -20px;  /* 调整这个值以减少空间 */
+            }
+            </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # 创建 selectbox
+    #model_cat = st.selectbox(
+        #'',  # 标签设置为空
+        #('OpenAI-4o', 'Deepseek', 'Grok'), 
+        #index=0
+    #)    
     
     # API Key 설정
     with st.sidebar.expander("🔑 API Key", expanded=False):
@@ -106,8 +125,29 @@ def read_docx(file):
 def read_txt(file):
     return file.getvalue().decode('utf-8')
 
+def fetch_content(url):
+    """주어진 URL에서 내용을 가져옵니다."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # 요청이 성공했는지 확인
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # 본문 내용을 추출 (예: <p> 태그의 텍스트)
+        paragraphs = soup.find_all('p')
+        content = ' '.join([para.get_text() for para in paragraphs])
+        return content
+    except Exception as e:
+        st.error(f"Error fetching content: {e}")
+        return ""
+    
 def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     st.set_page_config(layout="wide")
+    url = st.text_input("URL을 입력하세요:")
+    if st.button("내용 가져오기"):
+        content = fetch_content(url)
+        print("Gather url content: ","-"*20)
+        print(content)
+        
+
     model_handler = MyModel(model_name)
     
     # session_state에서 api_key 가져오기

@@ -21,6 +21,79 @@ class RAGProcessor:
             chunk_size=300,
             chunk_overlap=50
         )
+
+   
+    async def web_url(self, content) -> Optional[str]:
+        try:
+            # 문서 분할
+            chunk_size = 100  # Define the size of each chunk
+            splits = []
+            
+            # Split the content into chunks
+            for i in range(0, len(content), chunk_size):
+                splits.append(content[i:i + chunk_size])
+
+            print(f"분할된 청크 수: {len(splits)}")
+
+            # LLM 설정
+            llm = ChatOpenAI(model_name=self.model_name, api_key=self.api_key)
+            print("-- url 1")
+
+            # 요약 프롬프트 생성
+            map_prompt = PromptTemplate.from_template(
+                """다음은 문서 중 일부 내용입니다:
+                {content}
+                이 문서의 주요 내용을 요약해 주세요.
+                답변: """
+            )
+            print("-- url 2")
+
+            # 통합 프롬프트 생성
+            reduce_prompt = PromptTemplate.from_template(
+                """다음은 여러 요약들입니다:
+                {summaries}
+                이것들을 바탕으로 통합된 요약을 만들어 주세요.
+                요약을 할때,
+                1)***
+                2)***
+                3)***
+                4)***
+                ....
+                이렇게 매개 요약마다 번호를 매겨주세요. 
+                요약수량은 위에서의 4개에 재한하지 않고 객관 요약내용에 따라 조정해주세요.
+                답변: """
+            )
+            print("-- url 3")
+
+            # 처리 그래프 생성
+            summarize_doc = (
+                RunnableParallel(content=lambda x: x)  # Change this line to handle string directly
+                | map_prompt
+                | llm
+                | StrOutputParser()
+            )
+            print("-- url 4")
+
+            # 모든 문서 조각 처리
+            summaries = []
+            for doc in splits:
+                summary = await summarize_doc.ainvoke(doc)
+                summaries.append(summary)
+            print("-- url 5")
+
+            # 모든 요약 통합
+            final_chain = reduce_prompt | llm | StrOutputParser()
+            result = await final_chain.ainvoke({"summaries": "\n".join(summaries)})
+            print("-- url  6")
+
+            print("result:", result)
+            return result
+
+        except Exception as e:
+            print(f"RAG 처리 중 오류 발생: {str(e)}")
+            return None        
+      
+
         
     async def process_pdf(self, uploaded_file) -> Optional[str]:
         try:

@@ -35,32 +35,46 @@ import docx2txt
 import requests
 from bs4 import BeautifulSoup
 
+# Define content as a global variable
+content = ""
+
 def sidebar():
     """사이드바를 구성하고 사용자 설정을 반환합니다."""
     
-    #with st.sidebar.expander("🔎 Model", expanded=True):
-    #    st.image("https://www.onepointltd.com/wp-content/uploads/2024/02/shutterstock_1166533285-Converted-02.png")
-    #    st.title("Document Analysis")
-
+    # Add custom CSS to change sidebar color, input text color, border color, and expander border color
+    # st.markdown(
+    # """
+    #     <style>
+    #     /* Change sidebar background color to black */
+    #     .stSidebar {
+    #         background-color: black !important;  
+    #         color: white;  
+    #         border: 2px solid blue !important;  /* Set sidebar border color to blue */
+    #     }
+    #     
+    #     /* Change text color in the sidebar to white */
+    #     .stSidebar * {
+    #         color: white !important;  
+    #     }
+    #     
+    #     /* Change text color in the input fields to gray */
+    #     .stTextInput input {
+    #         color: gray !important;  /* Set default font color to gray */
+    #         background-color: black !important;  /* Change background to black */
+    #     }
+    #     
+    #     /* Change border color of each expander in the sidebar to blue */
+    #     .stExpander {
+    #         border: 2px solid blue !important;  /* Set expander border color to blue */
+    #     }
+    #     </style>
+    # """,
+    # unsafe_allow_html=True
+    # )
+    
     with st.sidebar.expander("🔎 Model", expanded=True):
         model_cat = st.selectbox('', ('gpt-4o-mini', 'Deepseek', 'Grok'), index=0)
-        st.markdown(
-        """
-            <style>
-            .stSelectbox {
-                margin-top: -20px;  /* 调整这个值以减少空间 */
-            }
-            </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # 创建 selectbox
-    #model_cat = st.selectbox(
-        #'',  # 标签设置为空
-        #('OpenAI-4o', 'Deepseek', 'Grok'), 
-        #index=0
-    #)    
+          
     
     # API Key 설정
     with st.sidebar.expander("🔑 API Key", expanded=False):
@@ -87,8 +101,17 @@ def sidebar():
 
     print ("model_cat: ",model_cat)
     
-
-    return model_cat, None, None
+    # Replace the topic input with checkboxes
+    with st.sidebar.expander("🔎 TOPIC", expanded=True):
+        topics = ['Forex', 'Crypto', 'Stock', 'Fund']
+        selected_topics = []
+        for topic in topics:
+            if st.checkbox(topic):
+                selected_topics.append(topic)
+        if not selected_topics:
+            st.warning('Please select at least one topic.')
+        
+    return model_cat, selected_topics, None
 
 # 手动写入 .env 文件
 def save_env_variable(env_path,key, value):
@@ -139,15 +162,9 @@ def fetch_content(url):
         st.error(f"Error fetching content: {e}")
         return ""
     
-def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
+async def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     st.set_page_config(layout="wide")
-    url = st.text_input("URL을 입력하세요:")
-    if st.button("내용 가져오기"):
-        content = fetch_content(url)
-        print("Gather url content: ","-"*20)
-        print(content)
-        
-
+    
     model_handler = MyModel(model_name)
     
     # session_state에서 api_key 가져오기
@@ -158,7 +175,7 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     
     # 좌측 사이드바
     with st.sidebar:
-        model_cat, topic, category = sidebar()
+        model_cat, topics, category = sidebar()
     
     # 두 열 레이아웃 생성
     main_col, right_col = st.columns([3, 1])
@@ -166,15 +183,25 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
     # 우측 AI Assistant (먼저 렌더링하여 독립성 보장)
     assistant_container = right_col.container()
     with assistant_container:
-        st.title("AI Assistant")
         chatbot = ChatBot(app_title, model_name)
-        chatbot.run()
-    
+        await chatbot.run_chatbot()  # Run the chatbot asynchronously
+
     # 메인 콘텐츠 영역
     main_container = main_col.container()
     with main_container:
-        st.title("Document Analysis")
-        
+        global content  # Declare content as a global variable
+        if content == "":
+            content = ""  # Initialize content if it's empty
+
+        url = st.text_input("URL을 입력하세요:")
+        if st.button("내용 가져오기"):
+            content = fetch_content(url)
+            print("Gather url content: ", "-" * 20)
+            print(content)
+            
+            # Display the content
+            st.write("### Fetched Content")
+
         # 파일 업로드 섹션
         uploaded_file = st.file_uploader("Choose a file", type=['txt', 'pdf', 'docx'])
         
@@ -210,7 +237,7 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
                             async def process_pdf_async():
                                 return await rag_processor.process_pdf(uploaded_file)
                             
-                            result = asyncio.run(process_pdf_async())
+                            result = await process_pdf_async()
                             if result:
                                 st.write("### 문서 요약")
                                 st.write(result)
@@ -218,10 +245,25 @@ def main(app_title='GPT Bot', model_name='gpt-4o-mini'):
             except:
                 st.error(f"Error reading file")
 
+        if content:
+            #st.write(content)
+            async def process_pdf_async():
+                return await rag_processor.web_url(content)
+            result = await process_pdf_async()
+            if result:
+                st.write("### 문서 요약")
+                st.write(result)
+                            
+
+
+
+
+
+
 if __name__ == "__main__":
     app_title = "My Bot"
     model_name = "gpt-4o-mini"  
-    main(app_title, model_name)
+    asyncio.run(main(app_title, model_name))
 
 
 
